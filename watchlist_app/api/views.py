@@ -14,6 +14,22 @@ from rest_framework.views import APIView
 METHODES CBV
 """
 
+class WatchListAV(APIView):
+
+    def get(self, request):
+        movies = WatchList.objects.all()
+        serializer = WatchListSerializer(movies, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = WatchListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+"""
 class MovieListApiView(APIView):
 
     def get(self, request, format=None):
@@ -62,7 +78,7 @@ class MovieDetailApiView(APIView):
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-"""
+
 METHODE FBV
 
 @api_view(['GET', 'POST'])
