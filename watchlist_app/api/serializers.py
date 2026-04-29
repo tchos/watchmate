@@ -2,21 +2,40 @@ from rest_framework import serializers
 
 from watchlist_app.models import WatchList, StreamPlatform, Review
 
-class WatchListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WatchList
-        fields = "__all__"
-
-class StreamPlatformSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StreamPlatform
-        fields = "__all__"
-
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = "__all__"
 
+class WatchListSerializer(serializers.ModelSerializer):
+    # une wathlist possede plusieurs review
+    # reviews provient de related_name dans models.ForeignKey(WatchList, on_delete=models.CASCADE, related_name="reviews")
+    reviews = ReviewSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = WatchList
+        fields = "__all__"
+
+class StreamPlatformSerializer(serializers.HyperlinkedModelSerializer):
+    # une plateforme possede plusieurs watchlist
+    # watchlist provient de related_name dans platform = models.ForeignKey(StreamPlatform, on_delete=models.CASCADE, related_name="watchlist")
+    watchlist = WatchListSerializer(many=True, read_only=True)
+    # watchlist = serializers.StringRelatedField(many = True) # Va afficher ce que vous avez defini dans la fonction __str__ de chaque modele
+
+    url = serializers.HyperlinkedIdentityField(
+        view_name='watchlist:stream-detail'
+    )
+
+    class Meta:
+        model = StreamPlatform
+        fields = "__all__"
+
+"""
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = "__all__"
+"""
 """
 # validation des valeurs des champs: Methode 1
 def name_length_validator(value):
